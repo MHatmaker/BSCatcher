@@ -14,7 +14,7 @@ def prettify(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
 
-podpathRoot = r'/home/htmkr/Development/PythonProjects/bloomberg/Podcasts'
+podpathRoot = r'/home/htmkr/Development/PythonProjects/Bloomberg/Podcasts'
 
 class CatchPodcasts():
 
@@ -23,14 +23,14 @@ class CatchPodcasts():
         self.urls = []
         self.startover = startover
 
-        # self.todaysDate = datetime.datetime.now()
-        # print(self.todaysDate)
-        # daysM3 = datetime.timedelta(days=1)
-        # self.dM3 = self.todaysDate - daysM3
-        # print(self.dM3)
-        # dtObj = self.todaysDate.date()
-        # self.dtStr = dtObj.strftime("%Y-%b-%d")
-        # print(self.dtStr)
+        self.todaysDate = datetime.datetime.now()
+        print(self.todaysDate)
+        daysM3 = datetime.timedelta(days=1)
+        self.dM3 = self.todaysDate - daysM3
+        print(self.dM3)
+        dtObj = self.todaysDate.date()
+        self.dtStr = dtObj.strftime("%Y-%m-%d")
+        print(self.dtStr)
 
         self.podpath = os.path.join(podpathRoot, srcDir)
         print(self.podpath)
@@ -136,7 +136,7 @@ class CatchPodcasts():
             self.urls.append({'srcUrl': url, 'tm': timeStamp})
 
     def reduceToLatest(self):
-        checker = PodcastDBChecker(self.startover)
+        checker = BSurv.PodcastDBChecker(self.startover)
 
         for v in self.loaded.itervalues():
             u = v['url']
@@ -144,7 +144,7 @@ class CatchPodcasts():
             pdt = v['pubDate'][5:-4]
             pd = datetime.datetime.strptime(pdt, "%d %b %Y %H:%M:%S")
             if pd > self.dM3:
-                fixed = pd.strftime("%Y-%b-%d %H:%M:%S")
+                fixed = pd.strftime("%Y-%m-%d %H:%M:%S")
                 tm = pd.time()
                 tmStr = tm.strftime("%H:%M%S")
                 v['tmStr'] = tmStr
@@ -171,7 +171,7 @@ def runPodcastCatcher(args):
         return checker.loadTestUrls()
     else:
         dt = datetime.date.today() # date will be used as directory name
-        srcdir = dt.strftime('%Y-%b-%d')
+        srcdir = dt.strftime('%Y-%m-%d')
         if(args['dir']):
             srcdir = args['dir']
 
