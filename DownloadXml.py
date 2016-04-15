@@ -4,6 +4,8 @@ import datetime
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import pdb
+import BSurv
+import argparse
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
@@ -12,23 +14,30 @@ def prettify(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
 
+podpathRoot = r'/home/htmkr/Development/PythonProjects/bloomberg/Podcasts'
 
 class CatchPodcasts():
 
-    def __init__(self):
+    def __init__(self, startover, srcDir):
         self.loaded = {}
         self.urls = []
+        self.startover = startover
 
-        self.todaysDate = datetime.datetime.now()
-        print(self.todaysDate)
-        daysM3 = datetime.timedelta(days=1)
-        self.dM3 = self.todaysDate - daysM3
-        print(self.dM3)
-        dtObj = self.todaysDate.date()
-        self.dtStr = dtObj.strftime("%Y-%b-%d")
-        print(self.dtStr)
+        # self.todaysDate = datetime.datetime.now()
+        # print(self.todaysDate)
+        # daysM3 = datetime.timedelta(days=1)
+        # self.dM3 = self.todaysDate - daysM3
+        # print(self.dM3)
+        # dtObj = self.todaysDate.date()
+        # self.dtStr = dtObj.strftime("%Y-%b-%d")
+        # print(self.dtStr)
+
+        self.podpath = os.path.join(podpathRoot, srcDir)
+        print(self.podpath)
+
+
         try:
-            os.mkdir(os.path.join('Podcasts', self.dtStr))
+            os.mkdir(self.podpath)
         except:
             pass
         self.logfile = open('NewPodcasts.log', 'w')
@@ -127,6 +136,8 @@ class CatchPodcasts():
             self.urls.append({'srcUrl': url, 'tm': timeStamp})
 
     def reduceToLatest(self):
+        checker = PodcastDBChecker(self.startover)
+
         for v in self.loaded.itervalues():
             u = v['url']
             # pdb.set_trace()
@@ -146,10 +157,37 @@ class CatchPodcasts():
                 self.catchUrls(u, tmStr)
         self.logfile.close
 
+def runPodcastCatcher(args):
+    startover = False
+    testurls = False
+    if(args['startover']):
+        startover = args['startover']
+
+    if args['testurls']:
+        testurls = True
+
+    if testurls:
+        checker = BSurv.PodcastDBChecker(startover)
+        return checker.loadTestUrls()
+    else:
+        dt = datetime.date.today() # date will be used as directory name
+        srcdir = dt.strftime('%Y-%b-%d')
+        if(args['dir']):
+            srcdir = args['dir']
+
+        catcher = CatchPodcasts(startover, srcdir)
+        catcher.getLatestXml()
+        catcher.parseXml()
+        catcher.reduceToLatest()
+        catcher.renameUrls()
+        catcher.downloadPodcasts()
+
+
 if __name__ == "__main__":
-    catcher = CatchPodcasts()
-    catcher.getLatestXml()
-    catcher.parseXml()
-    catcher.reduceToLatest()
-    catcher.renameUrls()
-    catcher.downloadPodcasts()
+    parser = argparse.ArgumentParser(description='Description of your program')
+    parser.add_argument('-d','--dir', help='Specify a source directory', required=False)
+    parser.add_argument('-s','--startover', help='Startover', required=False)
+    parser.add_argument('-t','--testurls', help='Test Urls from log file', required=False)
+
+    args = vars(parser.parse_args())
+    runPodcastCatcher(args)
