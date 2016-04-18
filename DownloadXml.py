@@ -4,7 +4,7 @@ import datetime
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import pdb
-import BSurv
+from BSurv import PodcastDBChecker
 import argparse
 
 def prettify(elem):
@@ -22,6 +22,7 @@ class CatchPodcasts():
         self.loaded = {}
         self.urls = []
         self.startover = startover
+        self.checker = None
 
         self.todaysDate = datetime.datetime.now()
         print(self.todaysDate)
@@ -124,19 +125,21 @@ class CatchPodcasts():
     # 'Tue, 05 Apr 2016 14:52:33 GMT'
     # '%a %d %b %Y %T %Z'
 
-    def catchUrls(self, url, timeStamp):
+    def catchUrls(self, url, dateStr, timeStamp):
         # pdb.set_trace()
+
         uLast2 = url.split('/')[6:7][0]
-        # print(uLast2)
-        u = 'BS' + timeStamp + ':' + uLast2
-        # print(u)
-        mangled = self.mangleName(u)
-        print("mangled {0} from {1}".format(mangled, url))
-        if os.path.isfile(mangled) == False:
-            self.urls.append({'srcUrl': url, 'tm': timeStamp})
+        if self.checker.addPodcast(uLast2, dateStr):
+            # print(uLast2)
+            u = 'BS' + timeStamp + ':' + uLast2
+            # print(u)
+            mangled = self.mangleName(u)
+            print("mangled {0} from {1}".format(mangled, url))
+            if os.path.isfile(mangled) == False:
+                self.urls.append({'srcUrl': url, 'tm': timeStamp})
 
     def reduceToLatest(self):
-        checker = BSurv.PodcastDBChecker(self.startover)
+        self.checker = PodcastDBChecker(self.startover)
 
         for v in self.loaded.itervalues():
             u = v['url']
@@ -148,13 +151,15 @@ class CatchPodcasts():
                 tm = pd.time()
                 tmStr = tm.strftime("%H:%M%S")
                 v['tmStr'] = tmStr
+                dateStr = pd.strftime("%Y-%m-%d")
+                tm = pd.time()
                 # print(u)
                 # print(pd)
                 self.logfile.write(u)
                 self.logfile.write('\n')
                 self.logfile.write(fixed)
                 self.logfile.write('\n')
-                self.catchUrls(u, tmStr)
+                self.catchUrls(u, dateStr, tmStr)
         self.logfile.close
 
 def runPodcastCatcher(args):
@@ -167,7 +172,7 @@ def runPodcastCatcher(args):
         testurls = True
 
     if testurls:
-        checker = BSurv.PodcastDBChecker(startover)
+        checker = PodcastDBChecker(startover)
         return checker.loadTestUrls()
     else:
         dt = datetime.date.today() # date will be used as directory name

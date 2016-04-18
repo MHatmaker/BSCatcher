@@ -43,6 +43,9 @@ class PodcastDBChecker(object):
             with self.con:
                 self.cur.execute("insert into latest(Id, Name, d) values (?, ?, ?)", (self.id, name, dt))
             self.existingCatches.append(name)
+            return True
+        else:
+            return False
 
     def checkPodcastName(self, nm, today):
         # pdb.set_trace()

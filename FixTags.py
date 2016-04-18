@@ -7,7 +7,7 @@ import argparse
 import datetime
 eyed3.log.setLevel("ERROR")
 
-podpathRoot = r'/home/htmkr/.peapod/BBergSVExamples/Podcasts'
+podpathRoot = r'/home/htmkr/Development/PythonProjects/Bloomberg/Podcasts'
 uPodCast = unicode('Podcast', "UTF-8")
 
 def stringType(s):
@@ -139,7 +139,7 @@ class TagFixer(object):
 
 def runTagFixer(args):
     dt = datetime.date.today() # date will be used as directory name
-    srcdir = dt.strftime('%Y-%b-%d')
+    srcdir = dt.strftime('%Y-%m-%d')
     if(args['dir']):
         srcdir = args['dir']
     tf = TagFixer(srcdir)
