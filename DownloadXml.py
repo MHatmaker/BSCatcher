@@ -47,6 +47,7 @@ class CatchPodcasts():
         url = "http://www.bloomberg.com/feeds/podcasts/surveillance.xml"
         s = urllib2.urlopen(url)
         contents = s.read()
+        # pdb.set_trace()
         latestPath = os.path.join('Podcasts', "latest.xml")
         file = open(latestPath, 'w')
         file.write(contents)
@@ -141,6 +142,7 @@ class CatchPodcasts():
     def reduceToLatest(self):
         self.checker = PodcastDBChecker(self.startover)
 
+        # pdb.set_trace()
         for v in self.loaded.itervalues():
             u = v['url']
             # pdb.set_trace()
