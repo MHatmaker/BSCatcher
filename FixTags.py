@@ -7,7 +7,8 @@ import argparse
 import datetime
 eyed3.log.setLevel("ERROR")
 
-podpathRoot = r'/home/htmkr/Development/PythonProjects/Bloomberg/Podcasts'
+# podpathRoot = r'/home/htmkr/Development/PythonProjects/Bloomberg/Podcasts'
+podpathRoot = r'/home/htmkr/BloombergPodcasts'
 uPodCast = unicode('Podcast', "UTF-8")
 
 def stringType(s):

@@ -14,7 +14,8 @@ def prettify(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
 
-podpathRoot = r'/home/htmkr/Development/PythonProjects/Bloomberg/Podcasts'
+# podpathRoot = r'/home/htmkr/Development/PythonProjects/Bloomberg/Podcasts'
+podpathRoot = r'/home/htmkr/BloombergPodcasts'
 
 class CatchPodcasts():
 
@@ -54,7 +55,7 @@ class CatchPodcasts():
         file.close()
 
     def mangleName(self, nm):
-        file_name = os.path.join('Podcasts', self.dtStr, nm) + '.mp3'
+        file_name = os.path.join(podpathRoot, self.dtStr, nm) + '.mp3'
         return file_name
 
     def renameUrls(self):
