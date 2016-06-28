@@ -17,13 +17,27 @@ def prettify(elem):
 # podpathRoot = r'/home/htmkr/Development/PythonProjects/Bloomberg/Podcasts'
 podpathRoot = r'/home/htmkr/BloombergPodcasts'
 
+feeds = [
+    {
+        'subdir' :'surveillance',
+        'url' : 'http://www.bloomberg.com/feeds/podcasts/surveillance.xml',
+        'prefix' : 'BS'
+    },
+    {
+        'subdir' :'takingstock',
+        'url' : 'http://www.bloomberg.com/feeds/podcasts/taking_stock.xml',
+        'prefix' : 'TS'
+    }
+]
+
 class CatchPodcasts():
 
-    def __init__(self, startover, srcDir):
+    def __init__(self, fd, startover, srcDir):
         self.loaded = {}
         self.urls = []
         self.startover = startover
         self.checker = None
+        self.feed = fd
 
         self.todaysDate = datetime.datetime.now()
         print(self.todaysDate)
@@ -34,7 +48,7 @@ class CatchPodcasts():
         self.dtStr = dtObj.strftime("%Y-%m-%d")
         print(self.dtStr)
 
-        self.podpath = os.path.join(podpathRoot, srcDir)
+        self.podpath = os.path.join(podpathRoot, self.feed['subdir'], srcDir)
         print(self.podpath)
 
 
@@ -45,17 +59,18 @@ class CatchPodcasts():
         self.logfile = open('NewPodcasts.log', 'w')
 
     def getLatestXml(self):
-        url = "http://www.bloomberg.com/feeds/podcasts/surveillance.xml"
+        url = self.feed['url']
         s = urllib2.urlopen(url)
         contents = s.read()
         # pdb.set_trace()
-        latestPath = os.path.join('Podcasts', "latest.xml")
+        latest = "latest.xml"
+        latestPath = os.path.join('Podcasts', self.feed['subdir'], latest)
         file = open(latestPath, 'w')
         file.write(contents)
         file.close()
 
     def mangleName(self, nm):
-        file_name = os.path.join(podpathRoot, self.dtStr, nm) + '.mp3'
+        file_name = os.path.join(podpathRoot, self.feed['subdir'], self.dtStr, nm) + '.mp3'
         return file_name
 
     def renameUrls(self):
@@ -66,11 +81,11 @@ class CatchPodcasts():
 
             print(file_name)
 
-    def downloadPodcasts(self):
+    def fetchPodcasts(self):
 
         for url in self.urls:
-            # pdb.set_trace()
-            file_name = 'BS' + url['tm'] + url['srcUrl'].split('/')[6:7][0]
+            # pdb.set_trace()Download
+            file_name = self.feed['prefix'] + url['tm'] + url['srcUrl'].split('/')[6:7][0]
             # pdb.set_trace()
             # uLast2 = url.split('/')[6:7][0]
             # print(uLast2)
@@ -102,7 +117,9 @@ class CatchPodcasts():
             f.close()
 
     def parseXml(self):
-        tree = ET.parse(os.path.join('Podcasts', 'latest.xml'))
+        tree = ET.parse(os.path.join('Podcasts', self.feed['subdir'], 'latest.xml'))
+        root = tree.getroot()
+        tree = ET.parse(os.path.join('Podcasts', self.feed['subdir'], 'latest.xml'))
         root = tree.getroot()
         parsed = prettify(root)
         # print(parsed)
@@ -119,7 +136,7 @@ class CatchPodcasts():
 
         ndx = 0
         for itm in root.iter('pubDate'):
-            # print(itm.text)
+            # print(itm.text)parse
             d = self.loaded[ndx]
             d['pubDate'] = itm.text
             ndx += 1
@@ -133,7 +150,7 @@ class CatchPodcasts():
         uLast2 = url.split('/')[6:7][0]
         if self.checker.addPodcast(uLast2, dateStr):
             # print(uLast2)
-            u = 'BS' + timeStamp + ':' + uLast2
+            u = self.feed['prefix'] + timeStamp + ':' + uLast2
             # print(u)
             mangled = self.mangleName(u)
             print("mangled {0} from {1}".format(mangled, url))
@@ -183,12 +200,14 @@ def runPodcastCatcher(args):
         if(args['dir']):
             srcdir = args['dir']
 
-        catcher = CatchPodcasts(startover, srcdir)
-        catcher.getLatestXml()
-        catcher.parseXml()
-        catcher.reduceToLatest()
-        catcher.renameUrls()
-        catcher.downloadPodcasts()
+        for fd in feeds:
+            pdb.set_trace()
+            catcher = CatchPodcasts(fd, startover, srcdir)
+            catcher.getLatestXml()
+            catcher.parseXml()
+            catcher.reduceToLatest()
+            catcher.renameUrls()
+            catcher.fetchPodcasts()
 
 
 if __name__ == "__main__":

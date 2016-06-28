@@ -7,7 +7,7 @@ launchdir=/home/htmkr/Documents/Development/PythonProjects/Bloomberg/
 cd $launchdir
 pwd
 
-/usr/bin/python2.7 DownloadXml.py
+/usr/bin/python2.7 CatchPodcasts.py
 $SHELL
 
 nautilus --browser ~/BloombergPodcasts
