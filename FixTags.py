@@ -7,9 +7,19 @@ import argparse
 import datetime
 eyed3.log.setLevel("ERROR")
 
-# podpathRoot = r'/home/htmkr/Development/PythonProjects/Bloomberg/Podcasts'
-podpathRoot = r'/home/htmkr/BloombergPodcasts'
 uPodCast = unicode('Podcast', "UTF-8")
+podpathRoot = r'/home/htmkr/BloombergPodcasts'
+
+feeds = [
+    {
+        'subdir' :'surveillance',
+        'prefix' : u'BS'
+    },
+    {
+        'subdir' :'takingstock',
+        'prefix' : u'TS'
+    }
+]
 
 def stringType(s):
     strtype = None
@@ -25,8 +35,9 @@ def stringType(s):
     return strtype
 
 class TagFixer(object):
-    def __init__(self, ppath):
-        self.podpath = os.path.join(podpathRoot, ppath)
+    def __init__(self, ppath, fd):
+        self.feed = fd
+        self.podpath = os.path.join(podpathRoot, fd['subdir'], ppath)
         self.dateToday = unicode(ppath, "UTF-8")
         print(self.podpath)
 
@@ -72,7 +83,7 @@ class TagFixer(object):
                     print('still no genre tag : generate genre')
                     self.addGenre(f)
 
-                self.testForBSurveillance(f, fn)
+                self.addDT2Name(f, fn)
                 f.tag.album, f.tag.artist, f.tag.genre.name = album, artist, genreName
                 print(">>>>>>>artist : {0}, album : {1}, genreName : {2}".format(f.tag.album, f.tag.artist, f.tag.genre.name))
 
@@ -113,12 +124,11 @@ class TagFixer(object):
             print('no tag')
             self.addTag(f, fn)
 
-    def testForBSurveillance(self, f, fn):
+    def addDT2Name(self, f, fn):
         m, s = f.info.time_secs / 60, f.info.time_secs % 60
         # if 41 < m and m < 43:
-        if fn[:2] == 'BS':
-            print('renaming BS file {0}, with minutes {1}, seconds (2)'.format(fn, m, s))
-            f.tag.title = u'BS ' + unicode(fn, "UTF-8")
+        print('renaming BS file {0}, with minutes {1}, seconds (2)'.format(fn, m, s))
+        f.tag.title = u'BS ' + unicode(fn, "UTF-8")
 
     def updateTag(self, tagVal, fixVal, msg):
         if tagVal == None:
@@ -143,7 +153,8 @@ def runTagFixer(args):
     srcdir = dt.strftime('%Y-%m-%d')
     if(args['dir']):
         srcdir = args['dir']
-    tf = TagFixer(srcdir)
+    for fd in feeds:
+        tf = TagFixer(srcdir, fd)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Description of your program')
