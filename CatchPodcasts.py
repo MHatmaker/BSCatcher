@@ -201,7 +201,7 @@ def runPodcastCatcher(args):
             srcdir = args['dir']
 
         for fd in feeds:
-            pdb.set_trace()
+            # pdb.set_trace()
             catcher = CatchPodcasts(fd, startover, srcdir)
             catcher.getLatestXml()
             catcher.parseXml()
