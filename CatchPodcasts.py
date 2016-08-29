@@ -6,6 +6,7 @@ from xml.dom import minidom
 import pdb
 from BSurv import PodcastDBChecker
 import argparse
+import concat
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
@@ -208,6 +209,10 @@ def runPodcastCatcher(args):
             catcher.reduceToLatest()
             catcher.renameUrls()
             catcher.fetchPodcasts()
+
+        tspath = os.path.join(podpathRoot, 'takingstock', srcdir)
+        concatVideos = ConcatVideos(tspath)
+        concatVideos.concat()
 
 
 if __name__ == "__main__":
