@@ -83,7 +83,7 @@ class TagFixer(object):
                     print('still no genre tag : generate genre')
                     self.addGenre(f)
 
-                self.addDT2Name(f, fn)
+                self.addDT2Name(f, fn, fd.prefix)
                 f.tag.album, f.tag.artist, f.tag.genre.name = album, artist, genreName
                 print(">>>>>>>artist : {0}, album : {1}, genreName : {2}".format(f.tag.album, f.tag.artist, f.tag.genre.name))
 
@@ -124,11 +124,11 @@ class TagFixer(object):
             print('no tag')
             self.addTag(f, fn)
 
-    def addDT2Name(self, f, fn):
+    def addDT2Name(self, f, fn, prefix):
         m, s = f.info.time_secs / 60, f.info.time_secs % 60
         # if 41 < m and m < 43:
         print('renaming BS file {0}, with minutes {1}, seconds (2)'.format(fn, m, s))
-        f.tag.title = u'BS ' + unicode(fn, "UTF-8")
+        f.tag.title = prefix + unicode(fn, "UTF-8")
 
     def updateTag(self, tagVal, fixVal, msg):
         if tagVal == None:
