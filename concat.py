@@ -17,7 +17,8 @@ class ConcatVideos(object):
             print(glb[i])
             all = all + nxtmp3
 
-        all.export(os.path.join(self.mp3dir, 'TakinStock.mp3'), format = 'mp3')
+        all.export(os.path.join(self.mp3dir, 'TakingStock.mp3'), format = 'mp3')
+        print("Concatenated files into {0}".format(os.path.join(self.mp3dir, "TakingStock.mp3")))
 
 if __name__ == "__main__":
     mp3dir = '/home/htmkr/BloombergPodcasts/takingstock/2016-08-26'

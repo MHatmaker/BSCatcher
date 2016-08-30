@@ -6,7 +6,7 @@ from xml.dom import minidom
 import pdb
 from BSurv import PodcastDBChecker
 import argparse
-import concat
+from concat import ConcatVideos
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
