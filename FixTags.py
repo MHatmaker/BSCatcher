@@ -63,6 +63,7 @@ class TagFixer(object):
                     album = f.tag.album
                 except:
                     album = 'album exception'
+
                 album = self.updateTag(album, self.dateToday, "album")
                 try:
                     artist = f.tag.artist
@@ -83,7 +84,7 @@ class TagFixer(object):
                     print('still no genre tag : generate genre')
                     self.addGenre(f)
 
-                self.addDT2Name(f, fn, fd.prefix)
+                self.addDT2Name(f, fn, fd['prefix'])
                 f.tag.album, f.tag.artist, f.tag.genre.name = album, artist, genreName
                 print(">>>>>>>artist : {0}, album : {1}, genreName : {2}".format(f.tag.album, f.tag.artist, f.tag.genre.name))
 

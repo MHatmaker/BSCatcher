@@ -86,7 +86,7 @@ class CatchPodcasts():
 
         for url in self.urls:
             # pdb.set_trace()Download
-            file_name = self.feed['prefix'] + url['tm'] + url['srcUrl'].split('/')[6:7][0]
+            file_name = self.feed['prefix'] + url['tm'] + url['srcUrl'].split('/')[3][0:-4]
             # pdb.set_trace()
             # uLast2 = url.split('/')[6:7][0]
             # print(uLast2)
@@ -148,7 +148,7 @@ class CatchPodcasts():
     def catchUrls(self, url, dateStr, timeStamp):
         # pdb.set_trace()
 
-        uLast2 = url.split('/')[6:7][0]
+        uLast2 = url.split('/')[3][0:-4]
         if self.checker.addPodcast(uLast2, dateStr):
             # print(uLast2)
             u = self.feed['prefix'] + timeStamp + ':' + uLast2
@@ -165,7 +165,10 @@ class CatchPodcasts():
         for v in self.loaded.itervalues():
             u = v['url']
             # pdb.set_trace()
-            pdt = v['pubDate'][5:-4]
+            # pdt = v['pubDate'][5:-4]  <--- started having extra -0000 on end
+            pdt = v['pubDate']
+            pos = pdt.rfind(':') + 3
+            pdt = pdt[5:pos]
             pd = datetime.datetime.strptime(pdt, "%d %b %Y %H:%M:%S")
             if pd > self.dM3:
                 fixed = pd.strftime("%Y-%m-%d %H:%M:%S")
