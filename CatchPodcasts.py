@@ -102,6 +102,9 @@ feeds = [
 
 ]
 
+
+downloaded = []
+
 class CatchPodcasts():
 
     def __init__(self, fd, startover, srcDir):
@@ -110,7 +113,6 @@ class CatchPodcasts():
         self.startover = startover
         self.checker = None
         self.feed = fd
-        self.downloaded = []
 
         self.todaysDate = datetime.datetime.now()
         print(self.todaysDate)
@@ -175,7 +177,7 @@ class CatchPodcasts():
             meta = u.info()
             file_size = int(meta.getheaders("Content-Length")[0])
             print(">>>>>>>>>> Downloading: %s Bytes: %s" % (file_name, file_size))
-            self.downloaded.append(file_name)
+            downloaded.append(file_name)
 
             file_size_dl = 0
             block_sz = 8192
@@ -192,9 +194,6 @@ class CatchPodcasts():
 
             f.close()
 
-        print("\n\n|||||||| Downloads ||||||||")
-        for downloaded in self.downloaded:
-            print(downloaded)
 
     def parseXml(self):
         tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
@@ -278,6 +277,11 @@ class CatchPodcasts():
                 self.catchUrls(u, dateStr, tmStr)
         self.logfile.close
 
+def summarize():
+    print("\n\n|||||||| Downloads ||||||||")
+    for download in downloaded:
+        print(download)
+
 def runPodcastCatcher(args):
     startover = False
     testurls = False
@@ -303,7 +307,8 @@ def runPodcastCatcher(args):
             catcher.parseXml()
             catcher.reduceToLatest()
             # catcher.renameUrls()
-        catcher.fetchPodcasts()
+            catcher.fetchPodcasts()
+        summarize()
 
         # tspath = os.path.join(podpathRoot, 'takingstock', srcdir)
         # concatVideos = ConcatVideos(tspath)
