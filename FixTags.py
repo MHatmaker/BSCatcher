@@ -18,7 +18,53 @@ feeds = [
     {
         'subdir' :'takingstock',
         'prefix' : u'TS'
+    },
+    {
+        'subdir' :'maddow',
+        'prefix' : u'RM'
+    },
+    {
+        'subdir' :'axelrod',
+        'prefix' : u'AX'
+    },
+    {
+        'subdir' : 'planetmoney',
+        'prefix' : 'PM'
+    },
+    {
+        'subdir' : 'gabfest',
+        'prefix' : 'GF'
+    },
+    {
+        'subdir' : 'podsaveamerica',
+        'prefix' : 'PS'
+    },
+    {
+        'subdir' : 'soundinvesting',
+        'prefix' : 'SI'
+    },
+    {
+        'subdir' : 'authorswriters',
+        'prefix' : 'AW'
+    },
+    #{
+    #    'subdir' : 'storygrid',
+    #    'url' : 'https://rss.simplecast.com/podcasts/1431/rss',
+    #    'prefix' : 'SG'
+    #},
+    {
+        'subdir' : 'otm',
+        'prefix' : 'OM'
+    },
+    {
+        'subdir' : 'studio360',
+        'prefix' : 'S3'
+    },
+    {
+        'subdir' : 'staytuned',
+        'prefix' : 'ST'
     }
+
 ]
 
 def stringType(s):

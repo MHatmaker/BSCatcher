@@ -37,7 +37,7 @@ class PodcastDBChecker(object):
 
     def addPodcast(self, name, dt):
         self.id += 1
-        print("name {0}, dt {1}".format(name, dt))
+        print("BSurv addPodcast - name {0}, dt {1}".format(name, dt))
         if self.checkPodcastName(name, dt) == False:
             print("insert {0}".format(name))
             with self.con:

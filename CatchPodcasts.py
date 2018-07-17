@@ -21,14 +21,85 @@ podpathRoot = r'/home/htmkr/BloombergPodcasts'
 feeds = [
     {
         'subdir' :'surveillance',
-        'url' : 'http://www.bloomberg.com/feeds/podcasts/surveillance.xml',
+        'url' : 'https://feeds.bloomberg.fm/BLM2561581769',
         'prefix' : 'BS'
     },
     {
         'subdir' :'takingstock',
-        'url' : 'http://www.bloomberg.com/feeds/podcasts/taking_stock.xml',
+        'url' : 'https://feeds.bloomberg.fm/BLM2236960495',
         'prefix' : 'TS'
+    },
+    {
+        'subdir' :'maddow',
+        'url' : 'http://podcastfeeds.nbcnews.com/drone/api/query/audio/podcast/1.0/MSNBC-MADDOW-NETCAST-MP3.xml',
+        'prefix' : 'RM'
+    },
+    {
+        'subdir' :'axelrod',
+        'url' : 'https://rss.art19.com/axe-files',
+        'prefix' : 'AX'
+    },
+    {
+        'subdir' : 'planetmoney',
+        'url' : 'https://www.npr.org/rss/podcast.php?id=510289',
+        'prefix' : 'PM'
+    },
+    {
+        'subdir' : 'gabfest',
+        'url' : 'https://feeds.megaphone.fm/slatespoliticalgabfest',
+        'prefix' : 'GF'
+    },
+    {
+        'subdir' : 'podsaveamerica',
+        'url' : 'http://feeds.feedburner.com/pod-save-america',
+        'prefix' : 'PS'
+    },
+    {
+        'subdir' : 'soundinvesting',
+        'url' : 'http://feeds.feedburner.com/PaulMerriman',
+        'prefix' : 'SI'
+    },
+    {
+        'subdir' : 'authorswriters',
+        'url' : 'https://www.kmweiland.com/wp-content/podcast/podcast-rss.xml',
+        'prefix' : 'AW'
+    },
+    #{
+    #    'subdir' : 'storygrid',
+    #    'url' : 'https://rss.simplecast.com/podcasts/1431/rss',
+    #    'prefix' : 'SG'
+    #},
+    {
+        'subdir' : 'otm',
+        'url' : 'http://feeds.wnyc.org/onthemedia',
+        'prefix' : 'OM'
+    },
+    {
+        'subdir' : 'studio360',
+        'url' : 'http://feeds.feedburner.com/studio360/podcast',
+        'prefix' : 'S3'
+    },
+    {
+        'subdir' : 'staytuned',
+        'url' : 'https://rss.art19.com/stay-tuned-with-preet',
+        'prefix' : 'ST'
+    },
+    {
+        'subdir' : 'adventuresng',
+        'url' : 'https://feeds.feedwrench.com/AdventuresInAngularOnly.rss',
+        'prefix' : 'NG'
+    },
+    {
+        'subdir' : 'talkpython',
+        'url' : 'https://talkpython.fm/episodes/rss',
+        'prefix' : 'PY'
+    },
+    {
+        'subdir' : 'tdi',
+        'url' : 'http://feeds.feedburner.com/tdicasts',
+        'prefix' : 'TD'
     }
+
 ]
 
 class CatchPodcasts():
@@ -39,6 +110,7 @@ class CatchPodcasts():
         self.startover = startover
         self.checker = None
         self.feed = fd
+        self.downloaded = []
 
         self.todaysDate = datetime.datetime.now()
         print(self.todaysDate)
@@ -65,7 +137,7 @@ class CatchPodcasts():
         contents = s.read()
         # pdb.set_trace()
         latest = "latest.xml"
-        latestPath = os.path.join('Podcasts', self.feed['subdir'], latest)
+        latestPath = os.path.join(podpathRoot, self.feed['subdir'], latest)
         file = open(latestPath, 'w')
         file.write(contents)
         file.close()
@@ -85,8 +157,10 @@ class CatchPodcasts():
     def fetchPodcasts(self):
 
         for url in self.urls:
-            # pdb.set_trace()Download
-            file_name = self.feed['prefix'] + url['tm'] + url['srcUrl'].split('/')[3][0:-4]
+            # pdb.set_trace()
+	    uLastPart = url['srcUrl'].rfind('/') + 1
+	    uLast = url['srcUrl'][uLastPart:]
+            file_name = self.feed['prefix'] + url['tm'] + uLast[0:-4]
             # pdb.set_trace()
             # uLast2 = url.split('/')[6:7][0]
             # print(uLast2)
@@ -100,7 +174,8 @@ class CatchPodcasts():
             f = open(file_name, 'wb')
             meta = u.info()
             file_size = int(meta.getheaders("Content-Length")[0])
-            print("Downloading: %s Bytes: %s" % (file_name, file_size))
+            print(">>>>>>>>>> Downloading: %s Bytes: %s" % (file_name, file_size))
+            self.downloaded.append(file_name)
 
             file_size_dl = 0
             block_sz = 8192
@@ -117,10 +192,14 @@ class CatchPodcasts():
 
             f.close()
 
+        print("\n\n|||||||| Downloads ||||||||")
+        for downloaded in self.downloaded:
+            print(downloaded)
+
     def parseXml(self):
-        tree = ET.parse(os.path.join('Podcasts', self.feed['subdir'], 'latest.xml'))
+        tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
         root = tree.getroot()
-        tree = ET.parse(os.path.join('Podcasts', self.feed['subdir'], 'latest.xml'))
+        tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
         root = tree.getroot()
         parsed = prettify(root)
         # print(parsed)
@@ -138,9 +217,19 @@ class CatchPodcasts():
         ndx = 0
         for itm in root.iter('pubDate'):
             # print(itm.text)parse
-            d = self.loaded[ndx]
-            d['pubDate'] = itm.text
-            ndx += 1
+            try:
+                d = self.loaded[ndx]
+                d['pubDate'] = itm.text
+                ndx += 1
+            except:
+                print('index error on pubDate')
+
+        #ndx = 0
+        #for itm in root.iter('title'):
+        #    print(itm.text)
+        #    d = self.loaded[ndx]
+        #    d['title'] = itm.text
+        #    ndx += 1
 
     # 'Tue, 05 Apr 2016 14:52:33 GMT'
     # '%a %d %b %Y %T %Z'
@@ -148,13 +237,16 @@ class CatchPodcasts():
     def catchUrls(self, url, dateStr, timeStamp):
         # pdb.set_trace()
 
-        uLast2 = url.split('/')[3][0:-4]
+	print("catchUrls {0}".format(url));
+        # uLast2 = url.split('/')[3][0:-4]
+	uLastPart = url.rfind('/') + 1
+	uLast2 = url[uLastPart:][0:-4]
         if self.checker.addPodcast(uLast2, dateStr):
             # print(uLast2)
             u = self.feed['prefix'] + timeStamp + ':' + uLast2
             # print(u)
             mangled = self.mangleName(u)
-            print("mangled {0} from {1}".format(mangled, url))
+            print("mangled {0} \n from {1}".format(mangled, url))
             if os.path.isfile(mangled) == False:
                 self.urls.append({'srcUrl': url, 'tm': timeStamp})
 
@@ -210,12 +302,12 @@ def runPodcastCatcher(args):
             catcher.getLatestXml()
             catcher.parseXml()
             catcher.reduceToLatest()
-            catcher.renameUrls()
-            catcher.fetchPodcasts()
+            # catcher.renameUrls()
+        catcher.fetchPodcasts()
 
-        tspath = os.path.join(podpathRoot, 'takingstock', srcdir)
-        concatVideos = ConcatVideos(tspath)
-        concatVideos.concat()
+        # tspath = os.path.join(podpathRoot, 'takingstock', srcdir)
+        # concatVideos = ConcatVideos(tspath)
+        # concatVideos.concat()
 
 
 if __name__ == "__main__":
