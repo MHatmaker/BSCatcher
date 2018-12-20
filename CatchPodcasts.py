@@ -1,4 +1,4 @@
-import urllib2
+import urllib
 import os
 import datetime
 import xml.etree.ElementTree as ET
@@ -7,6 +7,7 @@ import pdb
 from BSurv import PodcastDBChecker
 import argparse
 from concat import ConcatVideos
+import shutil
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
@@ -64,6 +65,12 @@ feeds = [
         'url' : 'https://www.kmweiland.com/wp-content/podcast/podcast-rss.xml',
         'prefix' : 'AW'
     },
+    # {
+    #     'subdir' : 'wellstoried',
+    #     'url' : 'http://feeds.soundcloud.com/users/soundcloud:users:306512413/sounds.rss',
+    #     'prefix' : 'WS'
+    # },
+
     #{
     #    'subdir' : 'storygrid',
     #    'url' : 'https://rss.simplecast.com/podcasts/1431/rss',
@@ -99,6 +106,11 @@ feeds = [
         'url' : 'http://feeds.feedburner.com/tdicasts',
         'prefix' : 'TD'
     }
+    #{
+    #    'subdir' : 'politicaljunkie',
+    #    'url' : 'https://www.krpoliticaljunkie.com/feed/podcast',
+    #    'prefix' : 'PJ'
+    #}
 
 ]
 
@@ -134,8 +146,9 @@ class CatchPodcasts():
         self.logfile = open('NewPodcasts.log', 'w')
 
     def getLatestXml(self):
+        pdb.set_trace()
         url = self.feed['url']
-        s = urllib2.urlopen(url)
+        s = urllib.urlopen(url)
         contents = s.read()
         # pdb.set_trace()
         latest = "latest.xml"
@@ -171,7 +184,7 @@ class CatchPodcasts():
             # firstPart = file_name[:20]
             # fixedUrl = os.path.join(firstPart, uLast2) + ".mp3"
             print("urlopen {0}".format(url))
-            u = urllib2.urlopen(url['srcUrl'])
+            u = urllib.urlopen(url['srcUrl'])
 
             f = open(file_name, 'wb')
             meta = u.info()
@@ -201,7 +214,7 @@ class CatchPodcasts():
         tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
         root = tree.getroot()
         parsed = prettify(root)
-        # print(parsed)
+        #print(parsed)
 
         root = tree.getroot()
         ndx = 0
@@ -234,7 +247,7 @@ class CatchPodcasts():
     # '%a %d %b %Y %T %Z'
 
     def catchUrls(self, url, dateStr, timeStamp):
-        # pdb.set_trace()
+        pdb.set_trace()
 
 	print("catchUrls {0}".format(url));
         # uLast2 = url.split('/')[3][0:-4]
@@ -282,6 +295,17 @@ def summarize():
     for download in downloaded:
         print(download)
 
+def collect():
+    todaysDate = datetime.datetime.now()
+    dtObj = todaysDate.date()
+    dtStr = dtObj.strftime("%Y-%m-%d")
+    dstdir = os.path.join(podpathRoot, 'collected', dtStr)
+    print("\n\n collect podcasts in {0}\n".format(dstdir))
+    if(os.path.isdir(dstdir) == False):
+        os.mkdir(dstdir)
+    for download in downloaded:
+        shutil.copy2(download, dstdir)
+
 def runPodcastCatcher(args):
     startover = False
     testurls = False
@@ -309,6 +333,7 @@ def runPodcastCatcher(args):
             # catcher.renameUrls()
             catcher.fetchPodcasts()
         summarize()
+        collect()
 
         # tspath = os.path.join(podpathRoot, 'takingstock', srcdir)
         # concatVideos = ConcatVideos(tspath)
