@@ -22,12 +22,12 @@ podpathRoot = r'/home/htmkr/BloombergPodcasts'
 feeds = [
     {
         'subdir' :'surveillance',
-        'url' : 'https://feeds.bloomberg.fm/BLM2561581769',
+        'url' : 'http://feeds.bloomberg.fm/BLM2561581769',
         'prefix' : 'BS'
     },
     {
         'subdir' :'takingstock',
-        'url' : 'https://feeds.bloomberg.fm/BLM2236960495',
+        'url' : 'http://feeds.bloomberg.fm/BLM2236960495',
         'prefix' : 'TS'
     },
     {
@@ -146,7 +146,7 @@ class CatchPodcasts():
         self.logfile = open('NewPodcasts.log', 'w')
 
     def getLatestXml(self):
-        pdb.set_trace()
+        # pdb.set_trace()
         url = self.feed['url']
         s = urllib.urlopen(url)
         contents = s.read()
@@ -247,7 +247,7 @@ class CatchPodcasts():
     # '%a %d %b %Y %T %Z'
 
     def catchUrls(self, url, dateStr, timeStamp):
-        pdb.set_trace()
+        # pdb.set_trace()
 
 	print("catchUrls {0}".format(url));
         # uLast2 = url.split('/')[3][0:-4]
