@@ -27,7 +27,7 @@ class DirCleaner():
         #     os.mkdir(bkupdir)
         self.backup(bkupdir)
 
-    def backup(self, path):
+    def backup(self, path):    NEED TO LOSE RECURSION
         for dirpath, dirnames, files in os.walk(self.rootdir):
             # pdb.set_trace()
             if files:

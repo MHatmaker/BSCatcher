@@ -57,6 +57,7 @@ feeds = [
     },
     {
         'subdir' : 'soundinvesting',
+        # 'url' : 'http://paulmerriman.com/feed/podcast',
         'url' : 'http://feeds.feedburner.com/PaulMerriman',
         'prefix' : 'SI'
     },
@@ -105,12 +106,27 @@ feeds = [
         'subdir' : 'tdi',
         'url' : 'http://feeds.feedburner.com/tdicasts',
         'prefix' : 'TD'
+    },
+    {
+        'subdir' : 'oath',
+        'url' : 'https://feeds.megaphone.fm/theoath',
+        'prefix' : 'OT'
+    },
+    {
+        'subdir' : 'nutritionfacts',
+        'url' : 'http://nutritionfacts.org/audio/feed/podcast/',
+        'prefix' : 'NF'
+    },
+    {
+       'subdir' : 'politicaljunkie',
+       'url' : 'https://www.krpoliticaljunkie.com/feed/podcast',
+       'prefix' : 'PJ'
+    },
+    {
+       'subdir' : 'backstory',
+       'url' : 'http://feeds.feedburner.com/BackStoryRadio',
+       'prefix' : 'BK'
     }
-    #{
-    #    'subdir' : 'politicaljunkie',
-    #    'url' : 'https://www.krpoliticaljunkie.com/feed/podcast',
-    #    'prefix' : 'PJ'
-    #}
 
 ]
 
@@ -147,17 +163,24 @@ class CatchPodcasts():
 
     def getLatestXml(self):
         # pdb.set_trace()
-        url = self.feed['url']
-        s = urllib.urlopen(url)
-        contents = s.read()
-        # pdb.set_trace()
-        latest = "latest.xml"
-        latestPath = os.path.join(podpathRoot, self.feed['subdir'], latest)
-        file = open(latestPath, 'w')
-        file.write(contents)
-        file.close()
+        try:
+            url = self.feed['url']
+            s = urllib.urlopen(url)
+            contents = s.read()
+            # pdb.set_trace()
+            if(os.path.isdir(os.path.join(podpathRoot, self.feed['subdir']))) == False:
+                os.mkdir(os.path.join(podpathRoot, self.feed['subdir']))
+            latest = "latest.xml"
+            latestPath = os.path.join(podpathRoot, self.feed['subdir'], latest)
+            file = open(latestPath, 'w')
+            file.write(contents)
+            file.close()
+        except:
+            pass
 
     def mangleName(self, nm):
+        if(os.path.isdir(os.path.join(podpathRoot, self.feed['subdir'], self.dtStr))) == False:
+            os.mkdir(os.path.join(podpathRoot, self.feed['subdir'], self.dtStr))
         file_name = os.path.join(podpathRoot, self.feed['subdir'], self.dtStr, nm) + '.mp3'
         return file_name
 
@@ -209,39 +232,42 @@ class CatchPodcasts():
 
 
     def parseXml(self):
-        tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
-        root = tree.getroot()
-        tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
-        root = tree.getroot()
-        parsed = prettify(root)
-        #print(parsed)
-
-        root = tree.getroot()
-        ndx = 0
-        for itm in root.iter('enclosure'):
-            ats = itm.attrib
-            d = {}
-            self.loaded[ndx] = d
-            d['url'] = ats['url']
-            ndx += 1
-
-
-        ndx = 0
-        for itm in root.iter('pubDate'):
-            # print(itm.text)parse
-            try:
-                d = self.loaded[ndx]
-                d['pubDate'] = itm.text
+        try:
+            tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
+            root = tree.getroot()
+            tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
+            root = tree.getroot()
+            parsed = prettify(root)
+            #print(parsed)
+            # pdb.set_trace()
+            root = tree.getroot()
+            ndx = 0
+            for itm in root.iter('enclosure'):
+                ats = itm.attrib
+                d = {}
+                self.loaded[ndx] = d
+                d['url'] = ats['url']
                 ndx += 1
-            except:
-                print('index error on pubDate')
 
-        #ndx = 0
-        #for itm in root.iter('title'):
-        #    print(itm.text)
-        #    d = self.loaded[ndx]
-        #    d['title'] = itm.text
-        #    ndx += 1
+
+            ndx = 0
+            for itm in root.iter('pubDate'):
+                # print(itm.text)parse
+                try:
+                    d = self.loaded[ndx]
+                    d['pubDate'] = itm.text
+                    ndx += 1
+                except:
+                    print('index error on pubDate')
+
+            #ndx = 0
+            #for itm in root.iter('title'):
+            #    print(itm.text)
+            #    d = self.loaded[ndx]
+            #    d['title'] = itm.text
+            #    ndx += 1
+        except:
+            print("no element found error in parsing xml")
 
     # 'Tue, 05 Apr 2016 14:52:33 GMT'
     # '%a %d %b %Y %T %Z'
@@ -249,10 +275,10 @@ class CatchPodcasts():
     def catchUrls(self, url, dateStr, timeStamp):
         # pdb.set_trace()
 
-	print("catchUrls {0}".format(url));
-        # uLast2 = url.split('/')[3][0:-4]
-	uLastPart = url.rfind('/') + 1
-	uLast2 = url[uLastPart:][0:-4]
+    	print("catchUrls {0}".format(url));
+            # uLast2 = url.split('/')[3][0:-4]
+    	uLastPart = url.rfind('/') + 1
+    	uLast2 = url[uLastPart:][0:-4]
         if self.checker.addPodcast(uLast2, dateStr):
             # print(uLast2)
             u = self.feed['prefix'] + timeStamp + ':' + uLast2
@@ -273,21 +299,24 @@ class CatchPodcasts():
             pdt = v['pubDate']
             pos = pdt.rfind(':') + 3
             pdt = pdt[5:pos]
-            pd = datetime.datetime.strptime(pdt, "%d %b %Y %H:%M:%S")
-            if pd > self.dM3:
-                fixed = pd.strftime("%Y-%m-%d %H:%M:%S")
-                tm = pd.time()
-                tmStr = tm.strftime("%H:%M%S")
-                v['tmStr'] = tmStr
-                dateStr = pd.strftime("%Y-%m-%d")
-                tm = pd.time()
-                # print(u)
-                # print(pd)
-                self.logfile.write(u)
-                self.logfile.write('\n')
-                self.logfile.write(fixed)
-                self.logfile.write('\n')
-                self.catchUrls(u, dateStr, tmStr)
+            try:
+                pd = datetime.datetime.strptime(pdt, "%d %b %Y %H:%M:%S")
+                if pd > self.dM3:
+                    fixed = pd.strftime("%Y-%m-%d %H:%M:%S")
+                    tm = pd.time()
+                    tmStr = tm.strftime("%H:%M%S")
+                    v['tmStr'] = tmStr
+                    dateStr = pd.strftime("%Y-%m-%d")
+                    tm = pd.time()
+                    # print(u)
+                    # print(pd)
+                    self.logfile.write(u)
+                    self.logfile.write('\n')
+                    self.logfile.write(fixed)
+                    self.logfile.write('\n')
+                    self.catchUrls(u, dateStr, tmStr)
+            except:
+                print("date/time formatting problem in {0}".format(pdt))
         self.logfile.close
 
 def summarize():
