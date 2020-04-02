@@ -1,4 +1,4 @@
-import urllib
+import urllib.request
 import os
 import datetime
 import xml.etree.ElementTree as ET
@@ -165,14 +165,16 @@ class CatchPodcasts():
         # pdb.set_trace()
         try:
             url = self.feed['url']
-            s = urllib.urlopen(url)
-            contents = s.read()
+            # s = urllib.urlopen(url)
+            # contents = s.read()
+            with urllib.request.urlopen(url) as response:
+                contents = response.read()
             # pdb.set_trace()
             if(os.path.isdir(os.path.join(podpathRoot, self.feed['subdir']))) == False:
                 os.mkdir(os.path.join(podpathRoot, self.feed['subdir']))
             latest = "latest.xml"
             latestPath = os.path.join(podpathRoot, self.feed['subdir'], latest)
-            file = open(latestPath, 'w')
+            file = open(latestPath, 'wb')
             file.write(contents)
             file.close()
         except:
@@ -192,12 +194,22 @@ class CatchPodcasts():
 
             print(file_name)
 
+    def getLastPart(self, url) :
+        uLastPart = url['srcUrl'].rfind('/') + 1
+        return uLastPart
+
+    def findContentLength(self, content) :
+        for itm in content:
+            if(itm[0] == 'Content-Length') :
+                return int(itm[1])
+        return 0
+
     def fetchPodcasts(self):
 
         for url in self.urls:
-            # pdb.set_trace()
-	    uLastPart = url['srcUrl'].rfind('/') + 1
-	    uLast = url['srcUrl'][uLastPart:]
+
+            uLastPart = self.getLastPart(url) #url['srcUrl'].rfind('/') + 1
+            uLast = url['srcUrl'][uLastPart:]
             file_name = self.feed['prefix'] + url['tm'] + uLast[0:-4]
             # pdb.set_trace()
             # uLast2 = url.split('/')[6:7][0]
@@ -207,11 +219,13 @@ class CatchPodcasts():
             # firstPart = file_name[:20]
             # fixedUrl = os.path.join(firstPart, uLast2) + ".mp3"
             print("urlopen {0}".format(url))
-            u = urllib.urlopen(url['srcUrl'])
+            u = urllib.request.urlopen(url['srcUrl'])
 
             f = open(file_name, 'wb')
             meta = u.info()
-            file_size = int(meta.getheaders("Content-Length")[0])
+            # pdb.set_trace()
+            file_size = self.findContentLength(meta.items())
+            # file_size = int(meta.items()[1][1])   # ("Content-Length")[0])
             print(">>>>>>>>>> Downloading: %s Bytes: %s" % (file_name, file_size))
             downloaded.append(file_name)
 
@@ -275,10 +289,10 @@ class CatchPodcasts():
     def catchUrls(self, url, dateStr, timeStamp):
         # pdb.set_trace()
 
-    	print("catchUrls {0}".format(url));
+        print("catchUrls {0}".format(url));
             # uLast2 = url.split('/')[3][0:-4]
-    	uLastPart = url.rfind('/') + 1
-    	uLast2 = url[uLastPart:][0:-4]
+        uLastPart = url.rfind('/') + 1
+        uLast2 = url[uLastPart:][0:-4]
         if self.checker.addPodcast(uLast2, dateStr):
             # print(uLast2)
             u = self.feed['prefix'] + timeStamp + ':' + uLast2
@@ -292,7 +306,7 @@ class CatchPodcasts():
         self.checker = PodcastDBChecker(self.startover)
 
         # pdb.set_trace()
-        for v in self.loaded.itervalues():
+        for v in self.loaded.values():
             u = v['url']
             # pdb.set_trace()
             # pdt = v['pubDate'][5:-4]  <--- started having extra -0000 on end
