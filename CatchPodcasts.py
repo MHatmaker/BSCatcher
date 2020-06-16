@@ -89,7 +89,9 @@ feeds = [
     },
     {
         'subdir' : 'staytuned',
-        'url' : 'https://rss.art19.com/stay-tuned-with-preet',
+        # 'url' : 'https://www.omnycontent.com/d/playlist/aaea4e69-af51-495e-afc9-a9760146922b/0236a31f-71e0-49dd-97f8-aac7015df30b/370e1fbf-45d4-42d9-96fd-aac7015df319/podcast.rss',
+        'url' : 'https://www.omnycontent.com/d/playlist/aaea4e69-af51-495e-afc9-a9760146922b/0236a31f-71e0-49dd-97f8-aac7015df30b/370e1fbf-45d4-42d9-96fd-aac7015df319/podcast.rss',
+
         'prefix' : 'ST'
     },
     {
@@ -183,6 +185,8 @@ class CatchPodcasts():
     def mangleName(self, nm):
         if(os.path.isdir(os.path.join(podpathRoot, self.feed['subdir'], self.dtStr))) == False:
             os.mkdir(os.path.join(podpathRoot, self.feed['subdir'], self.dtStr))
+        if(len(nm) > 500):
+            nm = nm[:500]
         file_name = os.path.join(podpathRoot, self.feed['subdir'], self.dtStr, nm) + '.mp3'
         return file_name
 
@@ -273,6 +277,7 @@ class CatchPodcasts():
                     ndx += 1
                 except:
                     print('index error on pubDate')
+                    print(itm.text)
 
             #ndx = 0
             #for itm in root.iter('title'):

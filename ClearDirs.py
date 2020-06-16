@@ -76,13 +76,15 @@ def startCleanup(args) :
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Description of your program')
+    parser = argparse.ArgumentParser(description='Clear or clean empty podcast folders')
     parser.add_argument('-d','--startdir', help='Specify a source directory', required=False)
     parser.add_argument('-c', '--clean', help="Clean intermediate directories", default=False, action='store_true')
     parser.add_argument('-r', '--remove', help="Remove only empty directories", default=False, action='store_true')
 
     # pdb.set_trace()
     args = vars(parser.parse_args())
+    print('args?')
+    print(args)
     if(args['clean']) :
         if(args['clean'] == True) :
             startCleanup(args)
@@ -90,3 +92,6 @@ if __name__ == "__main__":
     if(args['remove']) :
         if(args['remove'] == True) :
             startCleanup(args)
+
+# python ClearDirs.py --startdir /run/media/htmkr/SPORT\ PLUS/Podcasts/ --remove
+
