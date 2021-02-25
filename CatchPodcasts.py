@@ -30,14 +30,14 @@ feeds = [
         'url' : 'http://feeds.bloomberg.fm/BLM2236960495',
         'prefix' : 'TS'
     },
-    {
-        'subdir' :'maddow',
-        'url' : 'http://podcastfeeds.nbcnews.com/drone/api/query/audio/podcast/1.0/MSNBC-MADDOW-NETCAST-MP3.xml',
-        'prefix' : 'RM'
-    },
+    # {
+    #     'subdir' :'maddow',
+    #     'url' : 'http://podcastfeeds.nbcnews.com/drone/api/query/audio/podcast/1.0/MSNBC-MADDOW-NETCAST-MP3.xml',
+    #     'prefix' : 'RM'
+    # },
     {
         'subdir' :'axelrod',
-        'url' : 'https://rss.art19.com/axe-files',
+        'url' : 'https://www.omnycontent.com/d/playlist/d83f52e4-2455-47f4-982e-ab790120b954/a5445dcc-ae1f-488d-941b-ab850106d3b6/ffd283fe-1043-4829-a279-ab850106d3d2/podcast.rss',
         'prefix' : 'AX'
     },
     {
@@ -58,7 +58,7 @@ feeds = [
     {
         'subdir' : 'soundinvesting',
         # 'url' : 'http://paulmerriman.com/feed/podcast',
-        'url' : 'http://feeds.feedburner.com/PaulMerriman',
+        'url' : 'http://paulmerriman.com/feed/podcast',
         'prefix' : 'SI'
     },
     {
@@ -81,11 +81,6 @@ feeds = [
         'subdir' : 'otm',
         'url' : 'http://feeds.wnyc.org/onthemedia',
         'prefix' : 'OM'
-    },
-    {
-        'subdir' : 'studio360',
-        'url' : 'http://feeds.feedburner.com/studio360/podcast',
-        'prefix' : 'S3'
     },
     {
         'subdir' : 'staytuned',
@@ -111,7 +106,7 @@ feeds = [
     },
     {
         'subdir' : 'oath',
-        'url' : 'https://feeds.megaphone.fm/theoath',
+        'url' : 'https://podcastfeeds.nbcnews.com/the-oath-with-chuck-rosenberg',
         'prefix' : 'OT'
     },
     {
@@ -124,11 +119,6 @@ feeds = [
        'url' : 'https://www.krpoliticaljunkie.com/feed/podcast',
        'prefix' : 'PJ'
     },
-    {
-       'subdir' : 'backstory',
-       'url' : 'http://feeds.feedburner.com/BackStoryRadio',
-       'prefix' : 'BK'
-    }
 
 ]
 
@@ -258,38 +248,41 @@ class CatchPodcasts():
         try:
             tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
             root = tree.getroot()
-            tree = ET.parse(os.path.join(podpathRoot, self.feed['subdir'], 'latest.xml'))
-            root = tree.getroot()
             parsed = prettify(root)
             #print(parsed)
             # pdb.set_trace()
             root = tree.getroot()
             ndx = 0
-            for itm in root.iter('enclosure'):
-                ats = itm.attrib
-                d = {}
-                self.loaded[ndx] = d
-                d['url'] = ats['url']
+            firstbunch = 10
+
+            for itm in root.iter('item'):
                 ndx += 1
+                if (ndx < firstbunch):
+                    d = {}
+                    self.loaded[ndx] = d
+                else:
+                    break
+                for subitm in itm.iter('enclosure'):
+                    ats = subitm.attrib
+                    d['url'] = ats['url']
+                for subitm in itm.iter('pubDate'):
+                    # print(itm.text)
+                    # pdb.set_trace()
+                    lastNdx = subitm.text.rindex(':')
+                    subItem = subitm.text[:lastNdx + 3]
+                    try:
+                        d['pubDate'] = subItem #[5:-4]
+                    except:
+                        pdb.set_trace()
+                        print('index error on pubDate')
+                        print(subItem) #[5:-4]
 
-
-            ndx = 0
-            for itm in root.iter('pubDate'):
-                # print(itm.text)parse
-                try:
-                    d = self.loaded[ndx]
-                    d['pubDate'] = itm.text
-                    ndx += 1
-                except:
-                    print('index error on pubDate')
-                    print(itm.text)
-
-            #ndx = 0
-            #for itm in root.iter('title'):
-            #    print(itm.text)
-            #    d = self.loaded[ndx]
-            #    d['title'] = itm.text
-            #    ndx += 1
+                        #ndx = 0
+                        #for itm in root.iter('title'):
+                        #    print(itm.text)
+                        #    d = self.loaded[ndx]
+                        #    d['title'] = itm.text
+                        #    ndx += 1vv
         except:
             print("no element found error in parsing xml")
 
@@ -303,7 +296,8 @@ class CatchPodcasts():
             # uLast2 = url.split('/')[3][0:-4]
         uLastPart = url.rfind('/') + 1
         uLast2 = url[uLastPart:][0:-4]
-        if self.checker.addPodcast(uLast2, dateStr):
+        pcName = self.feed['subdir'] + ':' + dateStr
+        if self.checker.addPodcast(pcName, dateStr):
             # print(uLast2)
             u = self.feed['prefix'] + timeStamp + ':' + uLast2
             # print(u)
@@ -319,8 +313,8 @@ class CatchPodcasts():
         for v in self.loaded.values():
             u = v['url']
             # pdb.set_trace()
-            # pdt = v['pubDate'][5:-4]  <--- started having extra -0000 on end
-            pdt = v['pubDate']
+            pdt = v['pubDate'] # [5:-4]  #<--- started having extra -0000 on end
+            #pdt = v['pubDate']
             pos = pdt.rfind(':') + 3
             pdt = pdt[5:pos]
             try:
