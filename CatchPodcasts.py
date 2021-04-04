@@ -100,6 +100,11 @@ feeds = [
         'prefix' : 'PY'
     },
     {
+        'subdir' : 'pythonbytes',
+        'url' : 'https://pythonbytes.fm/episodes/rss',
+        'prefix' : 'PB'
+    },
+    {
         'subdir' : 'tdi',
         'url' : 'http://feeds.feedburner.com/tdicasts',
         'prefix' : 'TD'
@@ -119,6 +124,16 @@ feeds = [
        'url' : 'https://www.krpoliticaljunkie.com/feed/podcast',
        'prefix' : 'PJ'
     },
+    {
+       'subdir' : 'alfranken',
+       'url' : 'https://rss.art19.com/the-al-franken-podcast',
+       'prefix' : 'AL'
+     },
+     {
+        'subdir' : 'hacksontap',
+        'url' : 'http://feeds.feedburner.com/hacks-on-tap',
+        'prefix' : 'HT'
+     }
 
 ]
 
@@ -155,13 +170,20 @@ class CatchPodcasts():
 
     def getLatestXml(self):
         # pdb.set_trace()
+        latestPath = ''
         try:
             url = self.feed['url']
+            print('getLatestXml url is {0}'.format(url))
             # s = urllib.urlopen(url)
             # contents = s.read()
-            with urllib.request.urlopen(url) as response:
-                contents = response.read()
             # pdb.set_trace()
+            try:
+                with urllib.request.urlopen(url) as response:
+                    contents = response.read()
+            except:
+                # .set_trace()
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                contents = urllib.request.urlopen(req).read()
             if(os.path.isdir(os.path.join(podpathRoot, self.feed['subdir']))) == False:
                 os.mkdir(os.path.join(podpathRoot, self.feed['subdir']))
             latest = "latest.xml"
@@ -170,6 +192,7 @@ class CatchPodcasts():
             file.write(contents)
             file.close()
         except:
+            print('error in getLatestXml for path {0}'.format(latestPath))
             pass
 
     def mangleName(self, nm):
